@@ -20,6 +20,7 @@ class StoredCheckResults
 
         $checkResults = collect($properties['checkResults'])
             ->map(fn (array $lineProperties) => new StoredCheckResult(...$lineProperties))
+            ->unique('name')
             ->sortBy(fn (StoredCheckResult $result) => strtolower($result->label));
 
         return new self(
@@ -29,12 +30,11 @@ class StoredCheckResults
     }
 
     /**
-     * @param \DateTimeInterface|null $finishedAt
-     * @param ?Collection<int, StoredCheckResult> $checkResults
+     * @param  ?Collection<int, StoredCheckResult>  $checkResults
      */
     public function __construct(
         DateTimeInterface $finishedAt = null,
-        ?Collection       $checkResults = null
+        Collection $checkResults = null
     ) {
         $this->finishedAt = $finishedAt ?? new DateTime();
 
@@ -50,20 +50,18 @@ class StoredCheckResults
 
     public function allChecksOk(): bool
     {
+        return ! $this->containsFailingCheck();
+    }
+
+    public function containsFailingCheck(): bool
+    {
         return $this->storedCheckResults->contains(
             fn (StoredCheckResult $line) => $line->status !== Status::ok()->value
         );
     }
 
-    public function containsFailingCheck(): bool
-    {
-        return ! $this->allChecksOk();
-    }
-
     /**
-     * @param array<int, Status>|Status $statuses
-     *
-     * @return bool
+     * @param  array<int, Status>|Status  $statuses
      */
     public function containsCheckWithStatus(array|Status $statuses): bool
     {
@@ -78,7 +76,7 @@ class StoredCheckResults
 
     public function toJson(): string
     {
-        return (string)json_encode($this->toArray());
+        return (string) json_encode($this->toArray());
     }
 
     public function toArray(): array

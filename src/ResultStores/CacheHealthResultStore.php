@@ -10,8 +10,8 @@ use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResults;
 class CacheHealthResultStore implements ResultStore
 {
     public function __construct(
-        public string $cacheStore = 'file',
-        public string $cacheKey = 'healthStoreResults',
+        public string $store = 'file',
+        public string $cacheKey = 'health:storeResults',
     ) {
     }
 
@@ -26,7 +26,7 @@ class CacheHealthResultStore implements ResultStore
                     label: $result->check->getLabel(),
                     notificationMessage: $result->getNotificationMessage(),
                     shortSummary: $result->getShortSummary(),
-                    status: (string)$result->status->value,
+                    status: (string) $result->status->value,
                     meta: $result->meta,
                 );
             })
@@ -35,14 +35,14 @@ class CacheHealthResultStore implements ResultStore
             });
 
         cache()
-            ->store($this->cacheStore)
+            ->store($this->store)
             ->put($this->cacheKey, $report->toJson());
     }
 
     public function latestResults(): ?StoredCheckResults
     {
         $healthResultsJson = cache()
-            ->store($this->cacheStore)
+            ->store($this->store)
             ->get($this->cacheKey);
 
         if (! $healthResultsJson) {

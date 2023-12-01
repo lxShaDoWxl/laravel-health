@@ -5,13 +5,16 @@ namespace Spatie\Health\Checks;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 use Spatie\Health\Enums\Status;
+
 use function trans;
 
 class Result
 {
     /** @var array<string, string|int|bool> */
     public array $meta = [];
+
     public Check $check;
+
     public ?CarbonInterface $ended_at;
 
     public static function make(string $message = ''): self
@@ -20,7 +23,7 @@ class Result
     }
 
     public function __construct(
-        public Status  $status,
+        public Status $status,
         public string $notificationMessage = '',
         public string $shortSummary = '',
     ) {
@@ -58,7 +61,12 @@ class Result
 
     public function getNotificationMessage(): string
     {
-        return trans($this->notificationMessage, $this->meta);
+        $meta = collect($this->meta)
+            ->filter(function ($item) {
+                return is_scalar($item);
+            })->toArray();
+
+        return trans($this->notificationMessage, $meta);
     }
 
     public function ok(string $message = ''): self
@@ -88,7 +96,7 @@ class Result
         return $this;
     }
 
-    /** @param array<string, mixed> $meta */
+    /** @param  array<string, mixed>  $meta */
     public function meta(array $meta): self
     {
         $this->meta = $meta;

@@ -12,7 +12,7 @@ use Spatie\Health\Enums\Status;
 
 class CheckFailedNotification extends Notification
 {
-    /** @param array<int, Result> $results */
+    /** @param  array<int, Result>  $results */
     public function __construct(public array $results)
     {
     }
@@ -21,7 +21,7 @@ class CheckFailedNotification extends Notification
     public function via(): array
     {
         /** @var array<int, string> $notificationChannels */
-        $notificationChannels = config('health.notifications.notifications.' . static::class);
+        $notificationChannels = config('health.notifications.notifications.'.static::class);
 
         return array_filter($notificationChannels);
     }
@@ -39,7 +39,7 @@ class CheckFailedNotification extends Notification
             return true;
         }
 
-        $cacheKey = 'health.latestNotificationSentAt';
+        $cacheKey = config('health.notifications.throttle_notifications_key', 'health:latestNotificationSentAt:').$channel;
 
         /** @var \Illuminate\Cache\CacheManager $cache */
         $cache = app('cache');
@@ -66,7 +66,7 @@ class CheckFailedNotification extends Notification
     {
         return (new MailMessage())
             ->from(config('health.notifications.mail.from.address', config('mail.from.address')), config('health.notifications.mail.from.name', config('mail.from.name')))
-            ->subject(trans('health::notifications.check_failed_mail_subject', ['application_name' => $this->applicationName()]))
+            ->subject(trans('health::notifications.check_failed_mail_subject', $this->transParameters()))
             ->markdown('health::mail.checkFailedNotification', ['results' => $this->results]);
     }
 
@@ -76,7 +76,7 @@ class CheckFailedNotification extends Notification
             ->error()
             ->from(config('health.notifications.slack.username'), config('health.notifications.slack.icon'))
             ->to(config('health.notifications.slack.channel'))
-            ->content(trans('health::notifications.check_failed_slack_message', ['application_name' => $this->applicationName()]));
+            ->content(trans('health::notifications.check_failed_slack_message', $this->transParameters()));
 
         foreach ($this->results as $result) {
             $slackMessage->attachment(function (SlackAttachment $attachment) use ($result) {
@@ -90,11 +90,14 @@ class CheckFailedNotification extends Notification
         return $slackMessage;
     }
 
-    public function applicationName(): string
+    /**
+     * @return array<string, string>
+     */
+    public function transParameters(): array
     {
-        /** @var string $applicationName */
-        $applicationName = config('app.name') ?? config('app.url') ?? 'Laravel application';
-
-        return $applicationName;
+        return [
+            'application_name' => config('app.name') ?? config('app.url') ?? 'Laravel application',
+            'env_name' => app()->environment(),
+        ];
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use function Pest\Laravel\artisan;
-use function Pest\Laravel\getJson;
 use Spatie\Health\Commands\RunHealthChecksCommand;
 use Spatie\Health\Facades\Health;
 use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResults;
 use Spatie\Health\Tests\TestClasses\FakeUsedDiskSpaceCheck;
+
+use function Pest\Laravel\artisan;
+use function Pest\Laravel\getJson;
 use function Spatie\PestPluginTestTime\testTime;
 use function Spatie\Snapshots\assertMatchesSnapshot;
 
@@ -25,7 +26,6 @@ beforeEach(function () {
 
 it('will display the results as json when the request accepts json', function () {
     artisan(RunHealthChecksCommand::class);
-
 
     $json = getJson('/')
         ->assertSuccessful()

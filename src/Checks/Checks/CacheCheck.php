@@ -30,18 +30,18 @@ class CacheCheck extends Check
         try {
             return $this->canWriteValuesToCache($driver)
                 ? $result->ok()
-                : $result->failed("Could not set or retrieve an application cache value.");
+                : $result->failed('Could not set or retrieve an application cache value.');
         } catch (Exception $exception) {
             return $result->failed("An exception occurred with the application cache: `{$exception->getMessage()}`");
         }
     }
 
-    protected function defaultDriver(): string
+    protected function defaultDriver(): ?string
     {
         return config('cache.default', 'file');
     }
 
-    protected function canWriteValuesToCache(string $driver): bool
+    protected function canWriteValuesToCache(?string $driver): bool
     {
         $expectedValue = Str::random(5);
 
