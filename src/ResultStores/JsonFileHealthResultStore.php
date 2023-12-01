@@ -39,8 +39,8 @@ class JsonFileHealthResultStore implements ResultStore
                     meta: $result->meta,
                 );
             })
-            ->each(function (StoredCheckResult $check) use ($report) {
-                $report->addCheck($check);
+            ->each(function (StoredCheckResult $check, $key) use ($report) {
+                $report->addCheck($check, $key);
             });
 
         $contents = $report->toJson();

@@ -41,9 +41,9 @@ class StoredCheckResults
         $this->storedCheckResults = $checkResults ?? collect();
     }
 
-    public function addCheck(StoredCheckResult $line): self
+    public function addCheck(StoredCheckResult $line, $key): self
     {
-        $this->storedCheckResults[] = $line;
+        $this->storedCheckResults[$key] = $line;
 
         return $this;
     }

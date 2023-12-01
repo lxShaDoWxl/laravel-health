@@ -30,8 +30,8 @@ class CacheHealthResultStore implements ResultStore
                     meta: $result->meta,
                 );
             })
-            ->each(function (StoredCheckResult $check) use ($report) {
-                $report->addCheck($check);
+            ->each(function (StoredCheckResult $check, $key) use ($report) {
+                $report->addCheck($check, $key);
             });
 
         cache()
