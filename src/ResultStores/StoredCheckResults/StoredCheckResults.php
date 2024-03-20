@@ -19,7 +19,14 @@ class StoredCheckResults
         $properties = json_decode($json, true);
 
         $checkResults = collect($properties['checkResults'])
-            ->map(fn (array $lineProperties) => new StoredCheckResult(...$lineProperties))
+            ->map(fn (array $lineProperties) => new StoredCheckResult(
+                $lineProperties['name'],
+                $lineProperties['label'] ?? '',
+                $lineProperties['notificationMessage'] ?? '',
+                $lineProperties['shortSummary'] ?? '',
+                $lineProperties['status'] ?? '',
+                $lineProperties['meta'] ?? [],
+            ))
             ->unique('name')
             ->sortBy(fn (StoredCheckResult $result) => strtolower($result->label));
 
@@ -33,8 +40,8 @@ class StoredCheckResults
      * @param  ?Collection<int, StoredCheckResult>  $checkResults
      */
     public function __construct(
-        DateTimeInterface $finishedAt = null,
-        Collection $checkResults = null
+        ?DateTimeInterface $finishedAt = null,
+        ?Collection $checkResults = null
     ) {
         $this->finishedAt = $finishedAt ?? new DateTime();
 

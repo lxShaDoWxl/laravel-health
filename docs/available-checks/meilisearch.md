@@ -1,8 +1,8 @@
 ---
 title: MeiliSearch
-weight: 13
+weight: 14
 ---
-
+[meilisearch.md](meilisearch.md)
 This check will verify if MeiliSearch is running. It will call MeiliSearch's [built-in health endpoint](https://docs.meilisearch.com/reference/api/health.html) and verify that its status returns `available`.
 
 ## Usage
@@ -45,5 +45,18 @@ use Spatie\Health\Checks\Checks\MeiliSearchCheck;
 
 Health::checks([
     MeiliSearchCheck::new()->timeout(2),
+]);
+```
+
+### Adding an authorization header
+
+You can use `token()` to add an authorization header to the request.
+
+```php
+use Spatie\Health\Facades\Health;
+use Spatie\Health\Checks\Checks\MeiliSearchCheck;
+
+Health::checks([
+    MeiliSearchCheck::new()->token('auth-token'),
 ]);
 ```
