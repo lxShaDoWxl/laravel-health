@@ -7,10 +7,11 @@ use Illuminate\Support\Str;
 use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Result;
 use Spatie\Health\Support\DbConnectionInfo;
+use Spatie\Health\Traits\HasDatabaseConnection;
 
 class DatabaseConnectionCountCheck extends Check
 {
-    protected ?string $connectionName = null;
+    use HasDatabaseConnection;
 
     protected ?int $warningThreshold = null;
 
@@ -30,26 +31,15 @@ class DatabaseConnectionCountCheck extends Check
         return $this;
     }
 
-    public function connectionName(string $connectionName): self
-    {
-        $this->connectionName = $connectionName;
-
-        return $this;
-    }
-
     public function run(): Result
     {
-        $connectionName = $this->connectionName ?? $this->getDefaultConnectionName();
-
         $connectionCount = $this->getConnectionCount();
 
         $shortSummary = $connectionCount.' '.Str::plural('connection', $connectionCount);
 
         $result = Result::make()
             ->ok()
-            ->meta([
-                'connection_count' => $connectionCount,
-            ])
+            ->meta(['connection_count' => $connectionCount])
             ->shortSummary($shortSummary);
 
         if ($connectionCount > $this->errorThreshold) {
@@ -65,17 +55,12 @@ class DatabaseConnectionCountCheck extends Check
         return $result;
     }
 
-    protected function getDefaultConnectionName(): string
-    {
-        return config('database.default');
-    }
-
     protected function getConnectionCount(): int
     {
         $connectionName = $this->connectionName ?? $this->getDefaultConnectionName();
 
         $connection = app(ConnectionResolverInterface::class)->connection($connectionName);
 
-        return (new DbConnectionInfo())->connectionCount($connection);
+        return (new DbConnectionInfo)->connectionCount($connection);
     }
 }

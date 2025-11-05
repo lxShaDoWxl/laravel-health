@@ -1,9 +1,9 @@
 ---
-title: MeiliSearch
-weight: 13
+title: Meilisearch
+weight: 14
 ---
-
-This check will verify if MeiliSearch is running. It will call MeiliSearch's [built-in health endpoint](https://docs.meilisearch.com/reference/api/health.html) and verify that its status returns `available`.
+[meilisearch.md](meilisearch.md)
+This check will verify if Meilisearch is running. It will call Meilisearch's [built-in health endpoint](https://docs.meilisearch.com/reference/api/health.html) and verify that its status returns `available`.
 
 ## Usage
 
@@ -11,10 +11,10 @@ Here's how you can register the check.
 
 ```php
 use Spatie\Health\Facades\Health;
-use Spatie\Health\Checks\Checks\MeiliSearchCheck;
+use Spatie\Health\Checks\Checks\MeilisearchCheck;
 
 Health::checks([
-    MeiliSearchCheck::new(),
+    MeilisearchCheck::new(),
 ]);
 ```
 
@@ -26,10 +26,10 @@ You can use `url()` method to change that url.
 
 ```php
 use Spatie\Health\Facades\Health;
-use Spatie\Health\Checks\Checks\MeiliSearchCheck;
+use Spatie\Health\Checks\Checks\MeilisearchCheck;
 
 Health::checks([
-    MeiliSearchCheck::new()->url("https://your-custom-url:1234/custom-endpoint"),
+    MeilisearchCheck::new()->url("https://your-custom-url:1234/custom-endpoint"),
 ]);
 ```
 
@@ -41,9 +41,22 @@ You can use `timeout()` to set the maximum number of seconds the HTTP request sh
 
 ```php
 use Spatie\Health\Facades\Health;
-use Spatie\Health\Checks\Checks\MeiliSearchCheck;
+use Spatie\Health\Checks\Checks\MeilisearchCheck;
 
 Health::checks([
-    MeiliSearchCheck::new()->timeout(2),
+    MeilisearchCheck::new()->timeout(2),
+]);
+```
+
+### Adding an authorization header
+
+You can use `token()` to add an authorization header to the request.
+
+```php
+use Spatie\Health\Facades\Health;
+use Spatie\Health\Checks\Checks\MeilisearchCheck;
+
+Health::checks([
+    MeilisearchCheck::new()->token('auth-token'),
 ]);
 ```

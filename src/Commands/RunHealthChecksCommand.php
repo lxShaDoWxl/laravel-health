@@ -5,6 +5,7 @@ namespace Spatie\Health\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Result;
 use Spatie\Health\Enums\Status;
@@ -25,11 +26,17 @@ class RunHealthChecksCommand extends Command
 
     public function handle(): int
     {
+        if (Cache::get(PauseHealthChecksCommand::CACHE_KEY)) {
+            $this->info('Checks paused');
+
+            return self::SUCCESS;
+        }
+
         $this->info('Running checks...');
 
         $results = $this->runChecks();
 
-        if (! $this->option('no-notification')) {
+        if (! $this->option('no-notification') && config('health.notifications.enabled', false)) {
             $this->sendNotification($results);
         }
 
@@ -118,7 +125,7 @@ class RunHealthChecksCommand extends Command
         return $this;
     }
 
-    protected function outputResult(Result $result, Exception $exception = null): void
+    protected function outputResult(Result $result, ?Exception $exception = null): void
     {
         $status = ucfirst((string) $result->status->value);
 
@@ -132,7 +139,7 @@ class RunHealthChecksCommand extends Command
             Status::ok() => $this->info($okMessage),
             Status::warning() => $this->comment("{$status}: {$result->getNotificationMessage()}"),
             Status::failed() => $this->error("{$status}: {$result->getNotificationMessage()}"),
-            Status::crashed() => $this->error("{$status}}: `{$exception?->getMessage()}`"),
+            Status::crashed() => $this->error("{$status}: `{$exception?->getMessage()}`"),
             default => null,
         };
     }

@@ -19,6 +19,11 @@ Health::checks([
 ]);
 ```
 
+> **Important!**  
+> Be cautious when conditionally running or modifying checks. By default, skipped checks are considered failures, which
+may impact the overall health status. You can adjust this behavior by setting the configuration option
+`treat_skipped_as_failure` to `false` in the health config file.
+
 ## Custom condition methods
 
 You may find yourself repeating conditions for multiple checks. To avoid that, 
@@ -30,7 +35,7 @@ use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\RedisCheck;
 
-Health::macro('ifEnvironment', fn (string|array $envs) => app()->environment($envs));
+Check::macro('ifEnvironment', fn (string|array $envs) => $this->if(fn () => app()->environment($envs)));
 
 Health::checks([
     DebugModeCheck::new()->ifEnvironment('production')

@@ -5,7 +5,7 @@ use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResult;
 use Spatie\Health\ResultStores\StoredCheckResults\StoredCheckResults;
 
 it('has a method to check if the results contain a result with a certain status', function () {
-    $storedCheckResults = new StoredCheckResults(new DateTime(), collect([
+    $storedCheckResults = new StoredCheckResults(new DateTime, collect([
         makeStoredCheckResultWithStatus(Status::warning()),
         makeStoredCheckResultWithStatus(Status::ok()),
 
@@ -21,15 +21,41 @@ it('has a method to check if the results contain a result with a certain status'
 });
 
 it('has a method to check if one or more checks are failing', function () {
-    $storedCheckResults = new StoredCheckResults(new DateTime(), collect([
+    $storedCheckResults = new StoredCheckResults(new DateTime, collect([
         makeStoredCheckResultWithStatus(Status::warning()),
         makeStoredCheckResultWithStatus(Status::ok()),
     ]));
     expect($storedCheckResults->containsFailingCheck())->toBeTrue();
 });
 
+it('should not treat skipped checks as failing checks if treat_skipped_as_failure is disabled', function () {
+    config()->set('health.treat_skipped_as_failure', false);
+    $storedCheckResults = new StoredCheckResults(new DateTime, collect([
+        makeStoredCheckResultWithStatus(Status::skipped()),
+        makeStoredCheckResultWithStatus(Status::ok()),
+    ]));
+    expect($storedCheckResults->containsFailingCheck())->toBeFalse();
+});
+
+it('should treat skipped checks as failing checks if treat_skipped_as_failure is enabled', function () {
+    config()->set('health.treat_skipped_as_failure', true);
+    $storedCheckResults = new StoredCheckResults(new DateTime, collect([
+        makeStoredCheckResultWithStatus(Status::skipped()),
+        makeStoredCheckResultWithStatus(Status::ok()),
+    ]));
+    expect($storedCheckResults->containsFailingCheck())->toBeTrue();
+});
+
+it('should treat skipped checks as failing checks if treat_skipped_as_failure is not defined', function () {
+    $storedCheckResults = new StoredCheckResults(new DateTime, collect([
+        makeStoredCheckResultWithStatus(Status::skipped()),
+        makeStoredCheckResultWithStatus(Status::ok()),
+    ]));
+    expect($storedCheckResults->containsFailingCheck())->toBeTrue();
+});
+
 it('has a method to check if all checks are good', function () {
-    $storedCheckResults = new StoredCheckResults(new DateTime(), collect([
+    $storedCheckResults = new StoredCheckResults(new DateTime, collect([
         makeStoredCheckResultWithStatus(Status::ok()),
         makeStoredCheckResultWithStatus(Status::ok()),
     ]));

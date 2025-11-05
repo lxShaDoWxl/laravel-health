@@ -1,6 +1,6 @@
 ---
 title: Redis memory usage
-weight: 17
+weight: 18
 ---
 
 This check makes sure that Redis is not consuming too much memory.
@@ -16,7 +16,9 @@ use Spatie\Health\Facades\Health;
 use Spatie\Health\Checks\Checks\RedisMemoryUsageCheck;
 
 Health::checks([
-    RedisMemoryUsageCheck::new()->failWhenAboveMb(1000),
+    RedisMemoryUsageCheck::new()
+        ->warnWhenAboveMb(900)
+        ->failWhenAboveMb(1000),
 ]);
 ```
 

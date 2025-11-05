@@ -3,6 +3,7 @@
 namespace Spatie\Health\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Health\Commands\RunHealthChecksCommand;
@@ -17,9 +18,12 @@ class HealthCheckJsonResultsController
         }
 
         $checkResults = $resultStore->latestResults();
+        $statusCode = $checkResults?->containsFailingCheck()
+            ? config('health.json_results_failure_status', Response::HTTP_OK)
+            : Response::HTTP_OK;
 
         return response()
-            ->json($checkResults?->toArray() ?? [])
+            ->json($checkResults?->toArray() ?? [], $statusCode)
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
     }
 }

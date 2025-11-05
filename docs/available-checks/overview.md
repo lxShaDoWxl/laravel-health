@@ -8,6 +8,7 @@ Using this package you can register one or more checks to verify the health of y
 These are the checks created by us:
 
 - [Application Cache](cache)
+- [Backups](backups)
 - [CPU Load](cpu-load)
 - [Database Connection](db-connection)
 - [Database Connection Count](db-connection-count)
@@ -16,7 +17,7 @@ These are the checks created by us:
 - [Environment](environment)
 - [Flare Error Count](flare-error-count)
 - [Horizon](horizon)
-- [MeiliSearch](meilisearch)
+- [Meilisearch](meilisearch)
 - [Ping](ping)
 - [Queue](queue)
 - [Redis](redis)
@@ -33,4 +34,6 @@ Here's a list of third party packages:
 - [Env vars](https://github.com/encodia/laravel-health-env-vars)
 - [SSL certificate expiration](https://github.com/victord11/ssl-certification-health-check)
 - [Laravel Octane](https://github.com/ahtinurme/octane-health-check)
+- [Queue Size Check](https://github.com/SRWieZ/queue-size-health-check)
+- [Opcache Check](https://github.com/f9webltd/laravel-health-opcache)
 

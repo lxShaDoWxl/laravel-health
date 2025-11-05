@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Http;
 use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Result;
 
-class MeiliSearchCheck extends Check
+class MeilisearchCheck extends Check
 {
     protected int $timeout = 1;
 
     protected string $url = 'http://127.0.0.1:7700/health';
+
+    protected ?string $token = null;
 
     public function timeout(int $seconds): self
     {
@@ -28,6 +30,13 @@ class MeiliSearchCheck extends Check
         return $this;
     }
 
+    public function token(string $token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
     public function getLabel(): string
     {
         return $this->getName();
@@ -36,7 +45,10 @@ class MeiliSearchCheck extends Check
     public function run(): Result
     {
         try {
-            $response = Http::timeout($this->timeout)->asJson()->get($this->url);
+            $response = Http::timeout($this->timeout)
+                ->when($this->token !== null, fn ($r) => $r->withToken($this->token))
+                ->asJson()
+                ->get($this->url);
         } catch (Exception) {
             return Result::make()
                 ->failed()
@@ -61,7 +73,7 @@ class MeiliSearchCheck extends Check
 
         $status = Arr::get($response, 'status');
 
-        if ($status !== 'available') {
+        if (! in_array($status, ['available', 'running'])) {
             return Result::make()
                 ->failed()
                 ->shortSummary(ucfirst($status))

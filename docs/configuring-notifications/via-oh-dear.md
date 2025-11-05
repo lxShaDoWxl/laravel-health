@@ -7,15 +7,15 @@ In certain scenario's, your application can be in such a bad state, that it can'
 
 Using Oh Dear unlocks some more options: you'll be able to snooze notifications, and there are more delivery channels such as Telegram, Discord, MS Teams, Webhooks and more.
 
-Using this package, you can register a protected endpoint where [the application health check of Oh Dear](http://ohdear.app/docs/general/application-health-monitoring) can read the latest results of the health checks.
+Using this package, you can register a protected endpoint where [the application health check of Oh Dear](https://ohdear.app/docs/features/application-health-monitoring) can read the latest results of the health checks.
 
 ## Adding a health check endpoint to your Laravel app
 
 Oh Dear will send an HTTP request to your application to a specific endpoint to get health check. Your application should respond with JSON containing the result of health checks.
 
-You can add such an endpoint using the spatie/laravel-health package.  To do this, must configure the `ohdear_endpoint_key` in the `health` config file.
+You can add such an endpoint using the spatie/laravel-health package.  To do this, must configure the values within the `oh_dear_endpoint` key in the `health` config file.
 
-You can publish that `health` with this command:
+You can publish that `health` file with this command:
 
 ```bash
 php artisan vendor:publish --tag="health-config"
@@ -52,7 +52,7 @@ These are some of the default values in the published `health` config file.
 ],
 ```
 
-To get started:
+To get started (all options within `oh_dear_endpoint` key):
 
 - set the `enabled` config option to `true`
 - add a `secret` (we recommend putting it in the `.env` file, just like you would do for any application secret or password)

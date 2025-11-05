@@ -14,17 +14,26 @@ class StoredCheckResults
     /** @var Collection<int, StoredCheckResult> */
     public Collection $storedCheckResults;
 
+    private array $okStatuses;
+
     public static function fromJson(string $json): StoredCheckResults
     {
         $properties = json_decode($json, true);
 
         $checkResults = collect($properties['checkResults'])
-            ->map(fn (array $lineProperties) => new StoredCheckResult(...$lineProperties))
+            ->map(fn (array $lineProperties) => new StoredCheckResult(
+                $lineProperties['name'],
+                $lineProperties['label'] ?? '',
+                $lineProperties['notificationMessage'] ?? '',
+                $lineProperties['shortSummary'] ?? '',
+                $lineProperties['status'] ?? '',
+                $lineProperties['meta'] ?? [],
+            ))
             ->unique('name')
             ->sortBy(fn (StoredCheckResult $result) => strtolower($result->label));
 
         return new self(
-            finishedAt: (new DateTime())->setTimestamp($properties['finishedAt']),
+            finishedAt: (new DateTime)->setTimestamp($properties['finishedAt']),
             checkResults: $checkResults,
         );
     }
@@ -33,12 +42,18 @@ class StoredCheckResults
      * @param  ?Collection<int, StoredCheckResult>  $checkResults
      */
     public function __construct(
-        DateTimeInterface $finishedAt = null,
-        Collection $checkResults = null
+        ?DateTimeInterface $finishedAt = null,
+        ?Collection $checkResults = null
     ) {
-        $this->finishedAt = $finishedAt ?? new DateTime();
+        $this->finishedAt = $finishedAt ?? new DateTime;
 
         $this->storedCheckResults = $checkResults ?? collect();
+
+        $treatSkippedAsFailure = config('health.treat_skipped_as_failure', true);
+
+        $this->okStatuses = $treatSkippedAsFailure
+            ? [Status::ok()->value]
+            : [Status::ok()->value, Status::skipped()->value];
     }
 
     public function addCheck(StoredCheckResult $line, $key): self
@@ -56,7 +71,7 @@ class StoredCheckResults
     public function containsFailingCheck(): bool
     {
         return $this->storedCheckResults->contains(
-            fn (StoredCheckResult $line) => $line->status !== Status::ok()->value
+            fn (StoredCheckResult $line) => ! in_array($line->status, $this->okStatuses)
         );
     }
 

@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Health\Commands\PauseHealthChecksCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
 use Spatie\Health\Enums\Status;
 use Spatie\Health\Facades\Health;
@@ -96,8 +98,8 @@ it('can store the with failures results in the database', function () {
 
 it('will still run checks when there is a failing one', function () {
     Health::clearChecks()->checks([
-        new CrashingCheck(),
-        new FakeUsedDiskSpaceCheck(),
+        new CrashingCheck,
+        new FakeUsedDiskSpaceCheck,
     ]);
 
     artisan(RunHealthChecksCommand::class)
@@ -124,4 +126,23 @@ it('has an option that will let the command fail when a check fails', function (
 
     artisan('health:check')->assertSuccessful();
     artisan('health:check --fail-command-on-failing-check')->assertFailed();
+});
+
+it('does not perform checks if checks are paused', function () {
+    $mockRepository = Mockery::mock(Repository::class);
+
+    $mockRepository->shouldReceive('get')
+        ->once()
+        ->with(PauseHealthChecksCommand::CACHE_KEY)
+        ->andReturn(true);
+
+    Cache::swap($mockRepository);
+
+    Cache::shouldReceive('driver')->andReturn($mockRepository);
+
+    artisan('health:check')->assertSuccessful()->expectsOutput('Checks paused');
+
+    $historyItems = HealthCheckResultHistoryItem::get();
+
+    expect($historyItems)->toHaveCount(0);
 });
